@@ -1,0 +1,187 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏔️ Contador de Descidas</title>
+    <meta name="description" content="Sistema para contagem de descidas de tirolesa">
+
+    <!-- CSS Styles -->
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏔️</text></svg>">
+</head>
+<body>
+    <div class="app">
+        <!-- HEADER SECTION -->
+        <header class="header">
+            <div class="container">
+                <div class="header-content">
+                    <div class="header-info">
+                        <h1 class="app-title">🏔️ Contador de Descidas</h1>
+                        <p class="current-date" id="currentDate"></p>
+                    </div>
+
+                    <div class="header-controls">
+                        <input
+                            type="text"
+                            id="operatorName"
+                            placeholder="Nome do operador"
+                            class="operator-input"
+                        >
+                        <button
+                            id="clearAllBtn"
+                            class="clear-all-btn"
+                        >
+                            Zerar Tudo
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT -->
+        <div class="container">
+            <!-- NAVIGATION TABS -->
+            <div class="tab-navigation">
+                <button class="tab-btn active" data-tab="counter">
+                    Contador
+                </button>
+                <button class="tab-btn" data-tab="history">
+                    <span>Histórico</span>
+                    <span class="history-count" id="historyCount">(0)</span>
+                </button>
+                <button class="tab-btn" data-tab="summary">
+                    Resumo
+                </button>
+            </div>
+
+            <!-- TAB CONTENT CONTAINERS -->
+
+            <!-- COUNTER TAB -->
+            <div class="tab-content active" id="counterTab">
+                <div class="counter-section">
+                    <div class="section-header">
+                        <h2>Registrar Nova Descida</h2>
+                        <p>Clique no tipo de cadeirinha utilizada</p>
+                    </div>
+
+                    <div class="counter-buttons">
+                        <button class="counter-btn green" data-type="B">
+                            <div class="counter-emoji">🟢</div>
+                            <div class="counter-label">Cadeirinha B</div>
+                            <div class="counter-count" id="countB">0</div>
+                        </button>
+
+                        <button class="counter-btn blue" data-type="T0">
+                            <div class="counter-emoji">🔵</div>
+                            <div class="counter-label">Cadeirinha T0</div>
+                            <div class="counter-count" id="countT0">0</div>
+                        </button>
+
+                        <button class="counter-btn yellow" data-type="T1">
+                            <div class="counter-emoji">🟡</div>
+                            <div class="counter-label">Cadeirinha T1</div>
+                            <div class="counter-count" id="countT1">0</div>
+                        </button>
+
+                        <button class="counter-btn red" data-type="T2">
+                            <div class="counter-emoji">🔴</div>
+                            <div class="counter-label">Cadeirinha T2</div>
+                            <div class="counter-count" id="countT2">0</div>
+                        </button>
+                    </div>
+
+                    <!-- DAILY TOTALS SUMMARY -->
+                    <div class="daily-totals">
+                        <h3>Totais do Dia</h3>
+                        <div class="totals-grid">
+                            <div class="total-item">
+                                <div class="total-emoji">🟢</div>
+                                <div class="total-count" id="totalB">0</div>
+                                <div class="total-type">B</div>
+                            </div>
+                            <div class="total-item">
+                                <div class="total-emoji">🔵</div>
+                                <div class="total-count" id="totalT0">0</div>
+                                <div class="total-type">T0</div>
+                            </div>
+                            <div class="total-item">
+                                <div class="total-emoji">🟡</div>
+                                <div class="total-count" id="totalT1">0</div>
+                                <div class="total-type">T1</div>
+                            </div>
+                            <div class="total-item">
+                                <div class="total-emoji">🔴</div>
+                                <div class="total-count" id="totalT2">0</div>
+                                <div class="total-type">T2</div>
+                            </div>
+                        </div>
+                        <div class="grand-total">
+                            <div class="grand-total-label">Total Geral</div>
+                            <div class="grand-total-count" id="grandTotal">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HISTORY TAB -->
+            <div class="tab-content" id="historyTab">
+                <div class="history-section">
+                    <div class="section-header">
+                        <h2>Histórico do Dia</h2>
+                        <p id="historyDescription">0 descidas registradas</p>
+                    </div>
+
+                    <div class="history-list" id="historyList">
+                        <!-- Histórico será gerado dinamicamente pelo JavaScript -->
+                    </div>
+
+                    <div class="empty-history" id="emptyHistory">
+                        <div class="empty-icon">📝</div>
+                        <h3>Nenhuma descida registrada hoje</h3>
+                        <p>Vá para a aba "Contador" para registrar a primeira descida</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUMMARY TAB -->
+            <div class="tab-content" id="summaryTab">
+                <div class="summary-section" id="summaryContent">
+                    <!-- Resumo será gerado dinamicamente pelo JavaScript -->
+                </div>
+
+                <div class="export-section">
+                    <button class="export-btn" id="exportBtn">
+                        <span>📸</span>
+                        <span>Exportar como PNG</span>
+                    </button>
+                </div>
+
+                <div class="empty-summary" id="emptySummary">
+                    <div class="empty-icon">📊</div>
+                    <h3>Nenhum dado para resumir</h3>
+                    <p>Registre algumas descidas para ver o resumo do dia</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE CONFIRMAÇÃO -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <h3>Confirmar ação</h3>
+            <p id="modalMessage"></p>
+            <div class="modal-buttons">
+                <button class="modal-btn cancel" id="modalCancel">Cancelar</button>
+                <button class="modal-btn confirm" id="modalConfirm">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
