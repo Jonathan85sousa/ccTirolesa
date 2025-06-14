@@ -597,11 +597,31 @@ function exportSummaryAsImage() {
 }
 
 function simulateImageExport() {
-    var date = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
-    var filename = 'tirolesa-resumo-' + date + (operatorName ? '-' + operatorName.replace(/\s+/g, '-') : '') + '.png';
+    const summaryElement = document.getElementById('summaryContent');
 
-    console.log('Simulando download de: ' + filename);
-    alert('Em uma implementação real, seria baixado o arquivo: ' + filename);
+  html2canvas(summaryElement).then(canvas => {
+      const imageDataURL = canvas.toDataURL('image/png');
+
+      // Salvar no localStorage
+      try {
+          localStorage.setItem('summary-image', imageDataURL);
+          console.log('Imagem salva no localStorage com sucesso.');
+      } catch (e) {
+          console.warn('Erro ao salvar imagem no localStorage (possivelmente excedeu o limite de tamanho):', e);
+      }
+
+      // Criar e acionar o download
+      const link = document.createElement('a');
+      const date = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
+      const filename = `tirolesa-resumo-${date}${operatorName ? '-' + operatorName.replace(/\s+/g, '-') : ''}.png`;
+
+      link.href = imageDataURL;
+      link.download = filename;
+      link.click();
+  }).catch(error => {
+      console.error('Erro ao gerar imagem do resumo:', error);
+      alert('Erro ao exportar imagem. Tente novamente.');
+  });
 }
 
 // ======================
