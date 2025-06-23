@@ -1,16 +1,3 @@
-
-/*
-SISTEMA DE DESIGN E CORES:
-- Primária: #222222 (textos principais)
-- Secundária: #666666 (textos secundários)
-- Verde: #10b981 (Cadeirinha B)
-- Azul: #3b82f6 (Cadeirinha T0)
-- Amarelo: #f59e0b (Cadeirinha T1)
-- Vermelho: #ef4444 (Cadeirinha T2)
-- Fundo: Gradiente azul-verde suave
-- Cards: Branco com sombra sutil
-*/
-
 * {
     margin: 0;
     padding: 0;
@@ -19,9 +6,10 @@ SISTEMA DE DESIGN E CORES:
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    background: linear-gradient(135deg, #f0f9ff 0%, #ecfdf5 100%);
+    background: linear-gradient(135deg, #dbeafe 0%, #dcfce7 100%);
     color: #222222;
     min-height: 100vh;
+    overflow-x: hidden;
 }
 
 .app {
@@ -52,13 +40,13 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1.5rem 0;
+    padding: 1rem 0;
     gap: 1rem;
     flex-wrap: wrap;
 }
 
 .app-title {
-    font-size: 2rem;
+    font-size: 1.5rem;
     font-weight: bold;
     color: #222222;
     margin-bottom: 0.25rem;
@@ -66,7 +54,7 @@ body {
 
 .current-date {
     color: #666666;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
 }
 
 .header-controls {
@@ -83,6 +71,7 @@ body {
     font-size: 0.875rem;
     background: white;
     transition: border-color 0.2s;
+    width: 150px;
 }
 
 .operator-input:focus {
@@ -132,6 +121,7 @@ body {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    font-size: 0.9rem;
 }
 
 .tab-btn:hover {
@@ -190,79 +180,121 @@ body {
 
 .section-header p {
     color: #666666;
-    font-size: 1rem;
+    font-size: 0.95rem;
 }
 
 /* =================
-   COUNTER SECTION
+   COUNTER SECTION - GRID 2x2
    ================= */
 .counter-buttons {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1rem;
-    max-width: 1000px;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 1.5rem;
+    max-width: 700px;
     margin: 0 auto 2rem;
+    padding: 0 1rem;
+}
+
+.counter-btn-container {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    min-height: 120px;
+}
+
+.counter-btn-container:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
 }
 
 .counter-btn {
-    background: white;
+    flex: 1;
+    background: transparent;
     border: none;
-    padding: 2rem;
-    border-radius: 1rem;
+    padding: 1rem;
     cursor: pointer;
     transition: all 0.2s;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     text-align: center;
     position: relative;
-    overflow: hidden;
-}
-
-.counter-btn:hover {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 .counter-btn:active {
-    transform: translateY(0) scale(0.98);
+    transform: scale(0.98);
 }
 
 /* Cores específicas para cada tipo de cadeirinha */
-.counter-btn.green {
-    border-left: 5px solid #10b981;
+.counter-btn-container:has(.counter-btn.green) {
+    border-left: 6px solid #10b981;
 }
 
-.counter-btn.blue {
-    border-left: 5px solid #3b82f6;
+.counter-btn-container:has(.counter-btn.blue) {
+    border-left: 6px solid #3b82f6;
 }
 
-.counter-btn.yellow {
-    border-left: 5px solid #f59e0b;
+.counter-btn-container:has(.counter-btn.yellow) {
+    border-left: 6px solid #f59e0b;
 }
 
-.counter-btn.red {
-    border-left: 5px solid #ef4444;
+.counter-btn-container:has(.counter-btn.red) {
+    border-left: 6px solid #ef4444;
 }
 
 .counter-emoji {
-    font-size: 3rem;
-    margin-bottom: 1rem;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
 }
 
 .counter-label {
-    font-size: 1.125rem;
+    font-size: 0.9rem;
     font-weight: 600;
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
     color: #222222;
+    line-height: 1.2;
 }
 
 .counter-count {
-    font-size: 2rem;
+    font-size: 1.5rem;
     font-weight: bold;
     background: rgba(0, 0, 0, 0.1);
     border-radius: 0.5rem;
-    padding: 0.5rem 1rem;
+    padding: 0.5rem 0.75rem;
     display: inline-block;
     color: #222222;
+    min-width: 50px;
+}
+
+/* Botão de reduzir */
+.reduce-btn {
+    background: #f87171;
+    color: white;
+    border: none;
+    width: 45px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 1.1rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0;
+}
+
+.reduce-btn:hover {
+    background: #ef4444;
+}
+
+.reduce-btn:active {
+    transform: scale(0.9);
 }
 
 /* =================
@@ -272,15 +304,15 @@ body {
     background: white;
     border-radius: 1rem;
     padding: 1.5rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
     max-width: 600px;
     margin: 0 auto;
 }
 
 .daily-totals h3 {
     text-align: center;
-    margin-bottom: 1rem;
-    font-size: 1.125rem;
+    margin-bottom: 1.5rem;
+    font-size: 1.2rem;
     color: #222222;
 }
 
@@ -288,46 +320,53 @@ body {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
 }
 
 .total-item {
     background: #f9fafb;
-    border-radius: 0.5rem;
-    padding: 0.75rem;
+    border-radius: 0.75rem;
+    padding: 1rem 0.75rem;
     text-align: center;
+    transition: transform 0.2s;
+}
+
+.total-item:hover {
+    transform: translateY(-2px);
 }
 
 .total-emoji {
     font-size: 1.5rem;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.5rem;
 }
 
 .total-count {
-    font-size: 1.125rem;
+    font-size: 1.25rem;
     font-weight: bold;
     color: #222222;
+    margin-bottom: 0.25rem;
 }
 
 .total-type {
-    font-size: 0.875rem;
+    font-size: 0.8rem;
     color: #666666;
+    font-weight: 600;
 }
 
 .grand-total {
-    border-top: 1px solid #e5e7eb;
-    padding-top: 1rem;
+    border-top: 2px solid #e5e7eb;
+    padding-top: 1.5rem;
     text-align: center;
 }
 
 .grand-total-label {
-    font-size: 0.875rem;
+    font-size: 1rem;
     color: #666666;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.5rem;
 }
 
 .grand-total-count {
-    font-size: 1.75rem;
+    font-size: 2rem;
     font-weight: bold;
     color: #222222;
 }
@@ -336,16 +375,16 @@ body {
    HISTORY SECTION
    ================= */
 .history-list {
-    max-width: 600px;
+    max-width: 700px;
     margin: 0 auto;
 }
 
 .history-item {
     background: white;
-    border-radius: 0.5rem;
-    padding: 1rem;
-    margin-bottom: 0.75rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -353,36 +392,36 @@ body {
 }
 
 .history-item:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
 }
 
 .history-item-content {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 1.25rem;
 }
 
 .history-emoji {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
 }
 
 .history-details {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.5rem;
 }
 
 .history-type {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
 }
 
 .type-badge {
-    padding: 0.125rem 0.5rem;
+    padding: 0.25rem 0.75rem;
     border-radius: 9999px;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     font-weight: 600;
     border: 1px solid;
 }
@@ -412,23 +451,23 @@ body {
 }
 
 .history-time {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     color: #666666;
 }
 
 .history-number {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     color: #666666;
 }
 
 .delete-btn {
     background: none;
     border: none;
-    padding: 0.5rem;
+    padding: 0.75rem;
     border-radius: 0.5rem;
     cursor: pointer;
     transition: all 0.2s;
-    font-size: 1rem;
+    font-size: 1.1rem;
 }
 
 .delete-btn:hover {
@@ -445,7 +484,7 @@ body {
     background: white;
     padding: 2rem;
     border-radius: 1rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 
 .summary-header {
@@ -454,20 +493,20 @@ body {
 }
 
 .summary-title {
-    font-size: 2rem;
+    font-size: 2.25rem;
     font-weight: bold;
     margin-bottom: 1rem;
     color: #222222;
 }
 
 .summary-date {
-    font-size: 1rem;
+    font-size: 1.1rem;
     color: #666666;
     margin-bottom: 0.5rem;
 }
 
 .summary-operator {
-    font-size: 0.875rem;
+    font-size: 1rem;
     color: #666666;
 }
 
@@ -475,46 +514,52 @@ body {
     background: #222222;
     color: white;
     border-radius: 1rem;
-    padding: 1.5rem;
+    padding: 2rem;
     text-align: center;
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
 }
 
 .summary-total h3 {
-    font-size: 1.25rem;
-    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
 }
 
 .summary-total-count {
-    font-size: 3rem;
+    font-size: 3.5rem;
     font-weight: bold;
 }
 
 .summary-types {
     background: #f9fafb;
     border-radius: 1rem;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
 }
 
 .summary-types h3 {
     text-align: center;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
     color: #222222;
+    font-size: 1.25rem;
 }
 
 .summary-types-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1.25rem;
 }
 
 .summary-type-item {
     background: white;
-    border-radius: 0.5rem;
-    padding: 1rem;
+    border-radius: 0.75rem;
+    padding: 1.25rem;
     text-align: center;
     border: 2px solid;
+    transition: transform 0.2s;
+}
+
+.summary-type-item:hover {
+    transform: translateY(-2px);
 }
 
 .summary-type-item.green {
@@ -534,80 +579,82 @@ body {
 }
 
 .summary-type-emoji {
-    font-size: 2rem;
-    margin-bottom: 0.5rem;
+    font-size: 2.25rem;
+    margin-bottom: 0.75rem;
 }
 
 .summary-type-count {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     font-weight: bold;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.5rem;
     color: #222222;
 }
 
 .summary-type-label {
-    font-size: 0.75rem;
+    font-size: 0.85rem;
     color: #666666;
 }
 
 .summary-first-last {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
 }
 
 .summary-time-card {
     background: #f9fafb;
     border-radius: 1rem;
-    padding: 1.5rem;
+    padding: 2rem;
     text-align: center;
 }
 
 .summary-time-card h3 {
-    font-size: 1rem;
-    margin-bottom: 0.75rem;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
     color: #222222;
 }
 
 .summary-time-emoji {
-    font-size: 1.5rem;
-    margin-bottom: 0.5rem;
+    font-size: 1.8rem;
+    margin-bottom: 0.75rem;
 }
 
 .summary-time-type {
     font-weight: 600;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.5rem;
     color: #222222;
+    font-size: 1rem;
 }
 
 .summary-time-value {
-    font-size: 0.875rem;
+    font-size: 1rem;
     color: #666666;
 }
 
 .hourly-chart {
     background: #f9fafb;
     border-radius: 1rem;
-    padding: 1.5rem;
+    padding: 2rem;
 }
 
 .hourly-chart h3 {
     text-align: center;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
     color: #222222;
+    font-size: 1.25rem;
 }
 
 .chart-bar {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 0.5rem;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
 }
 
 .chart-time {
-    width: 3rem;
-    font-size: 0.875rem;
+    width: 3.5rem;
+    font-size: 0.9rem;
     color: #666666;
     text-align: right;
 }
@@ -616,7 +663,7 @@ body {
     flex: 1;
     background: #e5e7eb;
     border-radius: 9999px;
-    height: 1.5rem;
+    height: 2rem;
     position: relative;
     overflow: hidden;
 }
@@ -629,17 +676,17 @@ body {
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     font-weight: 600;
     transition: width 0.5s ease-out;
-    min-width: 2rem;
+    min-width: 2.5rem;
 }
 
 /* =================
    EXPORT SECTION
    ================= */
 .export-section {
-    margin-top: 1.5rem;
+    margin-top: 2rem;
     text-align: center;
 }
 
@@ -647,22 +694,22 @@ body {
     background: #10b981;
     color: white;
     border: none;
-    padding: 1rem 2rem;
+    padding: 1.25rem 2.5rem;
     border-radius: 1rem;
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
 }
 
 .export-btn:hover:not(:disabled) {
     background: #059669;
-    transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4);
 }
 
 .export-btn:active {
@@ -682,19 +729,19 @@ body {
 .empty-history,
 .empty-summary {
     text-align: center;
-    padding: 3rem 1rem;
+    padding: 4rem 1rem;
     color: #666666;
 }
 
 .empty-icon {
-    font-size: 4rem;
-    margin-bottom: 1rem;
+    font-size: 5rem;
+    margin-bottom: 1.5rem;
 }
 
 .empty-history h3,
 .empty-summary h3 {
-    font-size: 1.25rem;
-    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
     color: #666666;
 }
 
@@ -707,12 +754,12 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.6);
     display: none;
     align-items: center;
     justify-content: center;
     z-index: 1000;
-    animation: fadeIn 0.2s ease-out;
+    animation: fadeIn 0.3s ease-out;
 }
 
 .modal-overlay.active {
@@ -722,11 +769,12 @@ body {
 .modal {
     background: white;
     border-radius: 1rem;
-    padding: 2rem;
-    max-width: 400px;
+    padding: 2.5rem;
+    max-width: 450px;
     width: 90%;
     text-align: center;
-    animation: scaleIn 0.2s ease-out;
+    animation: scaleIn 0.3s ease-out;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
 }
 
 @keyframes scaleIn {
@@ -741,28 +789,31 @@ body {
 }
 
 .modal h3 {
-    margin-bottom: 1rem;
+    margin-bottom: 1.25rem;
     color: #222222;
+    font-size: 1.25rem;
 }
 
 .modal p {
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
     color: #666666;
+    font-size: 1rem;
 }
 
 .modal-buttons {
     display: flex;
-    gap: 1rem;
+    gap: 1.25rem;
     justify-content: center;
 }
 
 .modal-btn {
-    padding: 0.5rem 1.5rem;
+    padding: 0.75rem 2rem;
     border: none;
     border-radius: 0.5rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
+    font-size: 0.95rem;
 }
 
 .modal-btn.cancel {
@@ -784,78 +835,17 @@ body {
 }
 
 /* =================
-   RESPONSIVE DESIGN
-   ================= */
-@media (max-width: 768px) {
-    .app-title {
-        font-size: 1.5rem;
-    }
-
-    .header-content {
-        flex-direction: column;
-        text-align: center;
-    }
-
-    .counter-buttons {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-    }
-
-    .counter-btn {
-        padding: 1.5rem;
-    }
-
-    .totals-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .summary-types-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .summary-first-last {
-        grid-template-columns: 1fr;
-    }
-
-    .modal {
-        margin: 1rem;
-    }
-
-    .modal-buttons {
-        flex-direction: column;
-    }
-}
-
-@media (max-width: 480px) {
-    .container {
-        padding: 0 0.5rem;
-    }
-
-    .summary-section {
-        padding: 1rem;
-    }
-
-    .counter-emoji {
-        font-size: 2.5rem;
-    }
-
-    .counter-count {
-        font-size: 1.5rem;
-    }
-}
-
-/* =================
    LOADING ANIMATION
    ================= */
 .loading {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
 }
 
 .spinner {
-    width: 1rem;
-    height: 1rem;
+    width: 1.25rem;
+    height: 1.25rem;
     border: 2px solid currentColor;
     border-top-color: transparent;
     border-radius: 50%;
@@ -869,6 +859,111 @@ body {
 }
 
 /* =================
+   RESPONSIVE DESIGN
+   ================= */
+@media (max-width: 768px) {
+    .app-title {
+        font-size: 1.25rem;
+    }
+    
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+        padding: 1rem 0;
+    }
+    
+    .counter-buttons {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        padding: 0;
+    }
+    
+    .counter-btn {
+        padding: 1.25rem;
+    }
+    
+    .counter-emoji {
+        font-size: 1.75rem;
+    }
+    
+    .counter-count {
+        font-size: 1.25rem;
+    }
+    
+    .totals-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .summary-types-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .summary-first-last {
+        grid-template-columns: 1fr;
+    }
+    
+    .modal {
+        margin: 1rem;
+    }
+    
+    .modal-buttons {
+        flex-direction: column;
+    }
+
+    .operator-input {
+        width: 130px;
+    }
+
+    .tab-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+    }
+
+    .section-header h2 {
+        font-size: 1.5rem;
+    }
+
+    .summary-title {
+        font-size: 1.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0 0.75rem;
+    }
+    
+    .summary-section {
+        padding: 1.5rem;
+    }
+    
+    .counter-emoji {
+        font-size: 1.6rem;
+    }
+    
+    .counter-count {
+        font-size: 1.2rem;
+    }
+
+    .reduce-btn {
+        width: 40px;
+        font-size: 1rem;
+    }
+
+    .daily-totals {
+        padding: 1.25rem;
+    }
+
+    .summary-total {
+        padding: 1.5rem;
+    }
+
+    .summary-total-count {
+        font-size: 2.5rem;
+    }
+}
+
+/* =================
    UTILITY CLASSES
    ================= */
 .hidden {
@@ -878,13 +973,3 @@ body {
 .text-center {
     text-align: center;
 }
-
-.mb-1 { margin-bottom: 0.25rem; }
-.mb-2 { margin-bottom: 0.5rem; }
-.mb-3 { margin-bottom: 0.75rem; }
-.mb-4 { margin-bottom: 1rem; }
-
-.mt-1 { margin-top: 0.25rem; }
-.mt-2 { margin-top: 0.5rem; }
-.mt-3 { margin-top: 0.75rem; }
-.mt-4 { margin-top: 1rem; }
