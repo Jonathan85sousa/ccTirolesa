@@ -1,6 +1,5 @@
-
 // Sistema de Contagem de Descidas de Tirolesa
-// Versão em JavaScript Puro
+// JavaScript Puro - Versão Completa
 
 class TirolesaCounter {
     constructor() {
@@ -336,7 +335,7 @@ class TirolesaCounter {
                             <div class="history-time">${time}</div>
                         </div>
                     </div>
-                    <button class="delete-btn" onclick="app.deleteRecordAndUpdate('${record.id}')" title="Excluir registro">
+                    <button class="delete-btn" onclick="deleteRecord('${record.id}')" title="Excluir registro">
                         🗑️
                     </button>
                 </div>
@@ -603,6 +602,14 @@ class TirolesaCounter {
                 );
             });
         }
+
+        // Botão de exportar
+        const exportBtn = document.getElementById('exportBtn');
+        if (exportBtn) {
+            exportBtn.addEventListener('click', () => {
+                this.exportSummaryAsImage();
+            });
+        }
     }
 
     bindModalEvents() {
@@ -695,20 +702,6 @@ class TirolesaCounter {
     }
 }
 
-// CSS para animações (adicionado dinamicamente)
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideInRight {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-    }
-    @keyframes slideOutRight {
-        from { transform: translateX(0); opacity: 1; }
-        to { transform: translateX(100%); opacity: 0; }
-    }
-`;
-document.head.appendChild(style);
-
 // Inicializar aplicação quando DOM estiver carregado
 let app;
 document.addEventListener('DOMContentLoaded', () => {
@@ -719,12 +712,6 @@ document.addEventListener('DOMContentLoaded', () => {
 function deleteRecord(id) {
     if (app) {
         app.deleteRecordAndUpdate(id);
-    }
-}
-
-function exportSummaryAsImage() {
-    if (app) {
-        app.exportSummaryAsImage();
     }
 }
 
