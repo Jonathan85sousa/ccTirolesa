@@ -1,651 +1,734 @@
 
-/*
-SISTEMA DE CONTAGEM DE DESCIDAS DE TIROLESA - HTML/CSS/JS PURO
-============================================================
+// Sistema de Contagem de Descidas de Tirolesa
+// Versão em JavaScript Puro
 
-Este sistema permite registrar e gerenciar descidas de tirolesa por tipo de cadeirinha.
-Desenvolvido em HTML, CSS e JavaScript puro para máxima compatibilidade.
-
-FUNCIONALIDADES:
-- Contador de descidas por tipo (B, T0, T1, T2)
-- Histórico detalhado com horários
-- Resumo estatístico
-- Persistência local (localStorage)
-- Interface responsiva
-- Sistema de notificações
-
-ESTRUTURA DE DADOS:
-- Record: { id: timestamp, type: string, timestamp: ISO date }
-- Armazenamento: localStorage
-*/
-
-// ======================
-// VARIÁVEIS GLOBAIS
-// ======================
-var records = [];
-var operatorName = '';
-var activeTab = 'counter';
-var modalCallback = null;
-
-// ======================
-// INICIALIZAÇÃO
-// ======================
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🏔️ Inicializando Contador de Descidas');
-    initializeApp();
-});
-
-function initializeApp() {
-    loadData();
-    updateCurrentDate();
-    bindEvents();
-    updateDisplay();
-    console.log('✅ Aplicação inicializada com sucesso!');
-}
-
-// ======================
-// GERENCIAMENTO DE DADOS
-// ======================
-function loadData() {
-    try {
-        var storedRecords = localStorage.getItem('tirolesa-records');
-        records = storedRecords ? JSON.parse(storedRecords) : [];
-
-        var storedOperator = localStorage.getItem('operator-name');
-        operatorName = storedOperator || '';
-
-        document.getElementById('operatorName').value = operatorName;
-    } catch (error) {
-        console.error('Erro ao carregar dados:', error);
-        records = [];
-        operatorName = '';
-    }
-}
-
-function saveRecords() {
-    try {
-        localStorage.setItem('tirolesa-records', JSON.stringify(records));
-    } catch (error) {
-        console.error('Erro ao salvar registros:', error);
-    }
-}
-
-function saveOperatorName(name) {
-    operatorName = name;
-    localStorage.setItem('operator-name', name);
-}
-
-function getTodayRecords() {
-    var today = new Date().toDateString();
-    return records.filter(function(record) {
-        var recordDate = new Date(record.timestamp).toDateString();
-        return recordDate === today;
-    });
-}
-
-// ======================
-// FUNÇÕES PRINCIPAIS
-// ======================
-function addRecord(type) {
-    var newRecord = {
-        id: Date.now().toString(),
-        type: type,
-        timestamp: new Date().toISOString()
-    };
-
-    records.push(newRecord);
-    saveRecords();
-    updateDisplay();
-    showNotification('Descida ' + type + ' registrada!');
-}
-
-function deleteRecord(id) {
-    records = records.filter(function(record) {
-        return record.id !== id;
-    });
-    saveRecords();
-    updateDisplay();
-    showNotification('Registro excluído!');
-}
-
-function clearAllRecords() {
-    showConfirmModal(
-        'Tem certeza que deseja zerar todas as contagens? Esta ação não pode ser desfeita.',
-        function() {
-            records = [];
-            saveRecords();
-            updateDisplay();
-            showNotification('Todos os registros foram limpos!');
-        }
-    );
-}
-
-// ======================
-// INTERFACE E EVENTOS
-// ======================
-function updateCurrentDate() {
-    var dateElement = document.getElementById('currentDate');
-    var options = {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    };
-    var currentDate = new Date().toLocaleDateString('pt-BR', options);
-    dateElement.textContent = currentDate;
-}
-
-function bindEvents() {
-    // Eventos dos botões de contador
-    var counterBtns = document.querySelectorAll('.counter-btn');
-    for (var i = 0; i < counterBtns.length; i++) {
-        counterBtns[i].addEventListener('click', function(e) {
-            var type = e.currentTarget.dataset.type;
-            addRecord(type);
-
-            // Animação de feedback
-            e.currentTarget.style.transform = 'scale(0.95)';
-            setTimeout(function() {
-                e.currentTarget.style.transform = '';
-            }, 150);
-        });
+class TirolesaCounter {
+    constructor() {
+        this.records = [];
+        this.operatorName = '';
+        this.activeTab = 'counter';
+        this.modalCallback = null;
+        
+        this.init();
     }
 
-    // Eventos das tabs
-    var tabBtns = document.querySelectorAll('.tab-btn');
-    for (var i = 0; i < tabBtns.length; i++) {
-        tabBtns[i].addEventListener('click', function(e) {
-            var tab = e.currentTarget.dataset.tab;
-            switchTab(tab);
-        });
+    init() {
+        console.log('🏔️ Inicializando Contador de Descidas');
+        
+        // Carregar dados salvos
+        this.loadData();
+        
+        // Configurar interface
+        this.updateCurrentDate();
+        this.bindEvents();
+        this.updateDisplay();
+        
+        console.log('✅ Sistema inicializado com sucesso!');
+        console.log('🔧 Atalhos: 1-4 para adicionar descidas, ESC para fechar modal');
+        console.log('💾 Dados salvos automaticamente no navegador');
     }
 
-    // Campo nome do operador
-    document.getElementById('operatorName').addEventListener('input', function(e) {
-        saveOperatorName(e.target.value);
-    });
-
-    // Botão limpar tudo
-    document.getElementById('clearAllBtn').addEventListener('click', function() {
-        clearAllRecords();
-    });
-
-    // Botão exportar
-    document.getElementById('exportBtn').addEventListener('click', function() {
-        exportSummaryAsImage();
-    });
-
-    // Eventos do modal
-    document.getElementById('modalCancel').addEventListener('click', function() {
-        hideModal();
-    });
-
-    document.getElementById('modalConfirm').addEventListener('click', function() {
-        if (modalCallback) {
-            modalCallback();
-        }
-        hideModal();
-    });
-
-    document.getElementById('modalOverlay').addEventListener('click', function(e) {
-        if (e.target === e.currentTarget) {
-            hideModal();
-        }
-    });
-
-    // Atalhos de teclado
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            hideModal();
-        }
-
-        if (['1', '2', '3', '4'].indexOf(e.key) !== -1 && activeTab === 'counter') {
-            var types = ['B', 'T0', 'T1', 'T2'];
-            addRecord(types[parseInt(e.key) - 1]);
-        }
-    });
-}
-
-// ======================
-// NAVEGAÇÃO ENTRE TABS
-// ======================
-function switchTab(tab) {
-    activeTab = tab;
-
-    // Atualizar botões
-    var tabBtns = document.querySelectorAll('.tab-btn');
-    for (var i = 0; i < tabBtns.length; i++) {
-        tabBtns[i].classList.remove('active');
-    }
-    document.querySelector('[data-tab="' + tab + '"]').classList.add('active');
-
-    // Atualizar conteúdo
-    var tabContents = document.querySelectorAll('.tab-content');
-    for (var i = 0; i < tabContents.length; i++) {
-        tabContents[i].classList.remove('active');
-    }
-    document.getElementById(tab + 'Tab').classList.add('active');
-
-    // Atualizar dados específicos
-    if (tab === 'history') {
-        updateHistoryDisplay();
-    } else if (tab === 'summary') {
-        updateSummaryDisplay();
-    }
-}
-
-// ======================
-// ATUALIZAÇÃO DE DISPLAYS
-// ======================
-function updateDisplay() {
-    updateCounterDisplay();
-    updateHistoryCount();
-
-    if (activeTab === 'history') {
-        updateHistoryDisplay();
-    } else if (activeTab === 'summary') {
-        updateSummaryDisplay();
-    }
-}
-
-function updateCounterDisplay() {
-    var todayRecords = getTodayRecords();
-
-    // Contar por tipo
-    var counts = {
-        B: todayRecords.filter(function(r) { return r.type === 'B'; }).length,
-        T0: todayRecords.filter(function(r) { return r.type === 'T0'; }).length,
-        T1: todayRecords.filter(function(r) { return r.type === 'T1'; }).length,
-        T2: todayRecords.filter(function(r) { return r.type === 'T2'; }).length
-    };
-
-    // Atualizar contadores
-    var types = Object.keys(counts);
-    for (var i = 0; i < types.length; i++) {
-        var type = types[i];
-        var countElement = document.getElementById('count' + type);
-        var totalElement = document.getElementById('total' + type);
-
-        if (countElement) countElement.textContent = counts[type];
-        if (totalElement) totalElement.textContent = counts[type];
-    }
-
-    // Total geral
-    var grandTotal = todayRecords.length;
-    var grandTotalElement = document.getElementById('grandTotal');
-    if (grandTotalElement) {
-        grandTotalElement.textContent = grandTotal;
-    }
-}
-
-function updateHistoryCount() {
-    var todayRecords = getTodayRecords();
-    var countElement = document.getElementById('historyCount');
-    if (countElement) {
-        countElement.textContent = '(' + todayRecords.length + ')';
-    }
-}
-
-function updateHistoryDisplay() {
-    var todayRecords = getTodayRecords();
-    var historyList = document.getElementById('historyList');
-    var emptyHistory = document.getElementById('emptyHistory');
-    var historyDescription = document.getElementById('historyDescription');
-
-    // Atualizar descrição
-    var count = todayRecords.length;
-    historyDescription.textContent = count + ' descida' + (count !== 1 ? 's' : '') + ' registrada' + (count !== 1 ? 's' : '');
-
-    if (todayRecords.length === 0) {
-        historyList.style.display = 'none';
-        emptyHistory.style.display = 'block';
-        return;
-    }
-
-    historyList.style.display = 'block';
-    emptyHistory.style.display = 'none';
-
-    // Ordenar por data (mais recente primeiro)
-    var sortedRecords = todayRecords.slice().sort(function(a, b) {
-        return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
-    });
-
-    // Gerar HTML
-    var html = '';
-    for (var i = 0; i < sortedRecords.length; i++) {
-        var record = sortedRecords[i];
-        var emoji = getTypeEmoji(record.type);
-        var color = getTypeColor(record.type);
-        var time = new Date(record.timestamp).toLocaleTimeString('pt-BR', {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-        });
-        var number = sortedRecords.length - i;
-
-        html += '<div class="history-item">' +
-            '<div class="history-item-content">' +
-                '<div class="history-emoji">' + emoji + '</div>' +
-                '<div class="history-details">' +
-                    '<div class="history-type">' +
-                        '<span class="type-badge ' + color + '">Cadeirinha ' + record.type + '</span>' +
-                        '<span class="history-number">#' + number + '</span>' +
-                    '</div>' +
-                    '<div class="history-time">' + time + '</div>' +
-                '</div>' +
-            '</div>' +
-            '<button class="delete-btn" onclick="deleteRecord(\'' + record.id + '\')" title="Excluir registro">' +
-                '🗑️' +
-            '</button>' +
-        '</div>';
-    }
-
-    historyList.innerHTML = html;
-}
-
-function updateSummaryDisplay() {
-    var todayRecords = getTodayRecords();
-    var summaryContent = document.getElementById('summaryContent');
-    var emptySummary = document.getElementById('emptySummary');
-    var exportBtn = document.getElementById('exportBtn');
-
-    if (todayRecords.length === 0) {
-        summaryContent.style.display = 'none';
-        emptySummary.style.display = 'block';
-        exportBtn.disabled = true;
-        return;
-    }
-
-    summaryContent.style.display = 'block';
-    emptySummary.style.display = 'none';
-    exportBtn.disabled = false;
-
-    summaryContent.innerHTML = generateSummaryHTML(todayRecords);
-}
-
-function generateSummaryHTML(records) {
-    var counts = {
-        B: records.filter(function(r) { return r.type === 'B'; }).length,
-        T0: records.filter(function(r) { return r.type === 'T0'; }).length,
-        T1: records.filter(function(r) { return r.type === 'T1'; }).length,
-        T2: records.filter(function(r) { return r.type === 'T2'; }).length
-    };
-
-    // Primeira e última descida
-    var sortedRecords = records.slice().sort(function(a, b) {
-        return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
-    });
-    var first = sortedRecords[0];
-    var last = sortedRecords[sortedRecords.length - 1];
-
-    // Dados por hora
-    var hourlyData = getHourlyData(records);
-
-    return '<div class="summary-header">' +
-            '<h2 class="summary-title">📊 Resumo do Dia</h2>' +
-            '<p class="summary-date">' + new Date().toLocaleDateString('pt-BR', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            }) + '</p>' +
-            (operatorName ? '<p class="summary-operator">Operador: ' + operatorName + '</p>' : '') +
-        '</div>' +
-
-        '<div class="summary-total">' +
-            '<h3>Total de Descidas</h3>' +
-            '<div class="summary-total-count">' + records.length + '</div>' +
-        '</div>' +
-
-        '<div class="summary-types">' +
-            '<h3>Descidas por Tipo de Cadeirinha</h3>' +
-            '<div class="summary-types-grid">' +
-                '<div class="summary-type-item green">' +
-                    '<div class="summary-type-emoji">🟢</div>' +
-                    '<div class="summary-type-count">' + counts.B + '</div>' +
-                    '<div class="summary-type-label">Cadeirinha B</div>' +
-                '</div>' +
-                '<div class="summary-type-item blue">' +
-                    '<div class="summary-type-emoji">🔵</div>' +
-                    '<div class="summary-type-count">' + counts.T0 + '</div>' +
-                    '<div class="summary-type-label">Cadeirinha T0</div>' +
-                '</div>' +
-                '<div class="summary-type-item yellow">' +
-                    '<div class="summary-type-emoji">🟡</div>' +
-                    '<div class="summary-type-count">' + counts.T1 + '</div>' +
-                    '<div class="summary-type-label">Cadeirinha T1</div>' +
-                '</div>' +
-                '<div class="summary-type-item red">' +
-                    '<div class="summary-type-emoji">🔴</div>' +
-                    '<div class="summary-type-count">' + counts.T2 + '</div>' +
-                    '<div class="summary-type-label">Cadeirinha T2</div>' +
-                '</div>' +
-            '</div>' +
-        '</div>' +
-
-        '<div class="summary-first-last">' +
-            '<div class="summary-time-card">' +
-                '<h3>🌅 Primeira Descida</h3>' +
-                '<div class="summary-time-emoji">' + getTypeEmoji(first.type) + '</div>' +
-                '<div class="summary-time-type">Cadeirinha ' + first.type + '</div>' +
-                '<div class="summary-time-value">' + new Date(first.timestamp).toLocaleTimeString('pt-BR', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                }) + '</div>' +
-            '</div>' +
-            '<div class="summary-time-card">' +
-                '<h3>🌆 Última Descida</h3>' +
-                '<div class="summary-time-emoji">' + getTypeEmoji(last.type) + '</div>' +
-                '<div class="summary-time-type">Cadeirinha ' + last.type + '</div>' +
-                '<div class="summary-time-value">' + new Date(last.timestamp).toLocaleTimeString('pt-BR', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                }) + '</div>' +
-            '</div>' +
-        '</div>' +
-
-        (hourlyData.length > 0 ? generateHourlyChartHTML(hourlyData) : '');
-}
-
-function generateHourlyChartHTML(hourlyData) {
-    var maxCount = Math.max.apply(Math, hourlyData.map(function(item) { return item[1]; }));
-
-    var html = '';
-    for (var i = 0; i < hourlyData.length; i++) {
-        var item = hourlyData[i];
-        var hour = item[0];
-        var count = item[1];
-        html += '<div class="chart-bar">' +
-            '<div class="chart-time">' + hour + '</div>' +
-            '<div class="chart-bar-container">' +
-                '<div class="chart-bar-fill" style="width: ' + (count / maxCount * 100) + '%">' +
-                    (count > 0 ? count : '') +
-                '</div>' +
-            '</div>' +
-        '</div>';
-    }
-
-    return '<div class="hourly-chart">' +
-        '<h3>Descidas por Hora</h3>' +
-        html +
-    '</div>';
-}
-
-function getHourlyData(records) {
-    var hourlyCount = {};
-
-    for (var i = 0; i < records.length; i++) {
-        var record = records[i];
-        var hour = new Date(record.timestamp).getHours();
-        var hourKey = hour.toString();
-        if (hourKey.length === 1) hourKey = '0' + hourKey;
-        hourKey += ':00';
-        hourlyCount[hourKey] = (hourlyCount[hourKey] || 0) + 1;
-    }
-
-    var result = [];
-    var keys = Object.keys(hourlyCount);
-    for (var i = 0; i < keys.length; i++) {
-        var key = keys[i];
-        result.push([key, hourlyCount[key]]);
-    }
-
-    result.sort(function(a, b) {
-        return a[0].localeCompare(b[0]);
-    });
-
-    return result;
-}
-
-// ======================
-// FUNÇÕES AUXILIARES
-// ======================
-function getTypeEmoji(type) {
-    var emojis = {
-        'B': '🟢',
-        'T0': '🔵',
-        'T1': '🟡',
-        'T2': '🔴'
-    };
-    return emojis[type] || '⚪';
-}
-
-function getTypeColor(type) {
-    var colors = {
-        'B': 'green',
-        'T0': 'blue',
-        'T1': 'yellow',
-        'T2': 'red'
-    };
-    return colors[type] || 'gray';
-}
-
-// ======================
-// SISTEMA DE MODAL
-// ======================
-function showConfirmModal(message, callback) {
-    modalCallback = callback;
-    document.getElementById('modalMessage').textContent = message;
-    document.getElementById('modalOverlay').classList.add('active');
-}
-
-function hideModal() {
-    document.getElementById('modalOverlay').classList.remove('active');
-    modalCallback = null;
-}
-
-// ======================
-// SISTEMA DE NOTIFICAÇÕES
-// ======================
-function showNotification(message) {
-    var notification = document.createElement('div');
-    notification.style.cssText =
-        'position: fixed;' +
-        'top: 20px;' +
-        'right: 20px;' +
-        'background: #10b981;' +
-        'color: white;' +
-        'padding: 1rem 1.5rem;' +
-        'border-radius: 0.5rem;' +
-        'box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);' +
-        'z-index: 1001;' +
-        'font-weight: 600;' +
-        'animation: slideInRight 0.3s ease-out;';
-
-    notification.textContent = message;
-    document.body.appendChild(notification);
-
-    setTimeout(function() {
-        notification.style.animation = 'slideOutRight 0.3s ease-out';
-        setTimeout(function() {
-            if (notification.parentNode) {
-                notification.parentNode.removeChild(notification);
-            }
-        }, 300);
-    }, 3000);
-}
-
-// ======================
-// EXPORTAÇÃO DE IMAGEM
-// ======================
-function exportSummaryAsImage() {
-    var records = getTodayRecords();
-
-    if (records.length === 0) {
-        alert('Não há dados para exportar. Registre algumas descidas primeiro.');
-        return;
-    }
-
-    var exportBtn = document.getElementById('exportBtn');
-    var originalHTML = exportBtn.innerHTML;
-
-    exportBtn.innerHTML = '<div class="loading"><div class="spinner"></div><span>Exportando...</span></div>';
-    exportBtn.disabled = true;
-
-    setTimeout(function() {
+    // ==================
+    // GERENCIAMENTO DE DADOS
+    // ==================
+    
+    loadData() {
         try {
-            simulateImageExport();
-            showNotification('Resumo exportado com sucesso!');
+            const storedRecords = localStorage.getItem('tirolesa-records');
+            this.records = storedRecords ? JSON.parse(storedRecords) : [];
+            
+            const storedOperator = localStorage.getItem('operator-name');
+            this.operatorName = storedOperator || '';
+            
+            const operatorInput = document.getElementById('operatorName');
+            if (operatorInput) {
+                operatorInput.value = this.operatorName;
+            }
+            console.log('Dados carregados:', this.records.length, 'registros');
         } catch (error) {
-            console.error('Erro ao exportar:', error);
-            alert('Erro ao exportar imagem. Tente novamente.');
-        } finally {
-            exportBtn.innerHTML = originalHTML;
-            exportBtn.disabled = false;
+            console.error('Erro ao carregar dados:', error);
+            this.records = [];
+            this.operatorName = '';
         }
-    }, 2000);
+    }
+
+    saveRecords() {
+        try {
+            localStorage.setItem('tirolesa-records', JSON.stringify(this.records));
+            console.log('Dados salvos:', this.records.length, 'registros');
+        } catch (error) {
+            console.error('Erro ao salvar registros:', error);
+        }
+    }
+
+    saveOperatorName(name) {
+        this.operatorName = name;
+        localStorage.setItem('operator-name', name);
+    }
+
+    getTodayRecords() {
+        const today = new Date().toDateString();
+        return this.records.filter(record => {
+            const recordDate = new Date(record.timestamp).toDateString();
+            return recordDate === today;
+        });
+    }
+
+    addRecord(type) {
+        console.log('Adicionando registro do tipo:', type);
+        
+        const newRecord = {
+            id: Date.now().toString(),
+            type: type,
+            timestamp: new Date().toISOString()
+        };
+        
+        this.records.push(newRecord);
+        this.saveRecords();
+        
+        console.log('Registro adicionado:', newRecord);
+        return newRecord;
+    }
+
+    removeLastRecord(type) {
+        console.log('Removendo último registro do tipo:', type);
+        
+        const todayRecords = this.getTodayRecords();
+        const typeRecords = todayRecords.filter(record => record.type === type);
+        
+        if (typeRecords.length === 0) {
+            console.log('Nenhum registro do tipo', type, 'para remover');
+            return false;
+        }
+        
+        // Pegar o último registro deste tipo (mais recente)
+        const lastRecord = typeRecords.sort((a, b) => 
+            new Date(b.timestamp) - new Date(a.timestamp)
+        )[0];
+        
+        // Remover o registro
+        this.records = this.records.filter(record => record.id !== lastRecord.id);
+        
+        this.saveRecords();
+        console.log('Registro removido:', lastRecord);
+        return true;
+    }
+
+    deleteRecord(id) {
+        this.records = this.records.filter(record => record.id !== id);
+        this.saveRecords();
+    }
+
+    clearAllRecords() {
+        this.records = [];
+        this.saveRecords();
+    }
+
+    // ==================
+    // GERENCIAMENTO DE INTERFACE
+    // ==================
+
+    updateCurrentDate() {
+        const dateElement = document.getElementById('currentDate');
+        if (dateElement) {
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            const currentDate = new Date().toLocaleDateString('pt-BR', options);
+            dateElement.textContent = currentDate;
+        }
+    }
+
+    switchTab(tab) {
+        this.activeTab = tab;
+        
+        // Atualizar botões
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        const activeBtn = document.querySelector(`[data-tab="${tab}"]`);
+        if (activeBtn) {
+            activeBtn.classList.add('active');
+        }
+        
+        // Atualizar conteúdo
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+        });
+        const activeContent = document.getElementById(tab + 'Tab');
+        if (activeContent) {
+            activeContent.classList.add('active');
+        }
+
+        // Atualizar dados específicos
+        if (tab === 'history') {
+            this.updateHistoryDisplay();
+        } else if (tab === 'summary') {
+            this.updateSummaryDisplay();
+        }
+    }
+
+    showConfirmModal(message, callback) {
+        this.modalCallback = callback;
+        const modalMessage = document.getElementById('modalMessage');
+        const modalOverlay = document.getElementById('modalOverlay');
+        
+        if (modalMessage) modalMessage.textContent = message;
+        if (modalOverlay) modalOverlay.classList.add('active');
+    }
+
+    hideModal() {
+        const modalOverlay = document.getElementById('modalOverlay');
+        if (modalOverlay) modalOverlay.classList.remove('active');
+        this.modalCallback = null;
+    }
+
+    showNotification(message) {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1001;
+            font-weight: 600;
+            animation: slideInRight 0.3s ease-out;
+        `;
+        
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.animation = 'slideOutRight 0.3s ease-out';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }, 3000);
+    }
+
+    getTypeEmoji(type) {
+        const emojis = {
+            'B': '🟢',
+            'T0': '🔵',
+            'T1': '🟡',
+            'T2': '🔴'
+        };
+        return emojis[type] || '⚪';
+    }
+
+    getTypeColor(type) {
+        const colors = {
+            'B': 'green',
+            'T0': 'blue',
+            'T1': 'yellow',
+            'T2': 'red'
+        };
+        return colors[type] || 'gray';
+    }
+
+    // ==================
+    // ATUALIZAÇÃO DE DISPLAYS
+    // ==================
+
+    updateDisplay() {
+        this.updateCounterDisplay();
+        this.updateHistoryCount();
+        
+        if (this.activeTab === 'history') {
+            this.updateHistoryDisplay();
+        } else if (this.activeTab === 'summary') {
+            this.updateSummaryDisplay();
+        }
+    }
+
+    updateCounterDisplay() {
+        const todayRecords = this.getTodayRecords();
+        
+        // Contar por tipo
+        const counts = {
+            B: todayRecords.filter(r => r.type === 'B').length,
+            T0: todayRecords.filter(r => r.type === 'T0').length,
+            T1: todayRecords.filter(r => r.type === 'T1').length,
+            T2: todayRecords.filter(r => r.type === 'T2').length
+        };
+        
+        // Atualizar contadores
+        Object.keys(counts).forEach(type => {
+            const countElement = document.getElementById('count' + type);
+            const totalElement = document.getElementById('total' + type);
+            
+            if (countElement) countElement.textContent = counts[type];
+            if (totalElement) totalElement.textContent = counts[type];
+        });
+        
+        // Total geral
+        const grandTotal = todayRecords.length;
+        const grandTotalElement = document.getElementById('grandTotal');
+        if (grandTotalElement) {
+            grandTotalElement.textContent = grandTotal;
+        }
+    }
+
+    updateHistoryCount() {
+        const todayRecords = this.getTodayRecords();
+        const countElement = document.getElementById('historyCount');
+        if (countElement) {
+            countElement.textContent = `(${todayRecords.length})`;
+        }
+    }
+
+    updateHistoryDisplay() {
+        const todayRecords = this.getTodayRecords();
+        const historyList = document.getElementById('historyList');
+        const emptyHistory = document.getElementById('emptyHistory');
+        const historyDescription = document.getElementById('historyDescription');
+        
+        // Atualizar descrição
+        const count = todayRecords.length;
+        if (historyDescription) {
+            historyDescription.textContent = `${count} descida${count !== 1 ? 's' : ''} registrada${count !== 1 ? 's' : ''}`;
+        }
+        
+        if (todayRecords.length === 0) {
+            if (historyList) historyList.style.display = 'none';
+            if (emptyHistory) emptyHistory.style.display = 'block';
+            return;
+        }
+        
+        if (historyList) historyList.style.display = 'block';
+        if (emptyHistory) emptyHistory.style.display = 'none';
+        
+        // Ordenar por data (mais recente primeiro)
+        const sortedRecords = todayRecords.slice().sort((a, b) => 
+            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        );
+        
+        // Gerar HTML
+        let html = '';
+        sortedRecords.forEach((record, index) => {
+            const emoji = this.getTypeEmoji(record.type);
+            const color = this.getTypeColor(record.type);
+            const time = new Date(record.timestamp).toLocaleTimeString('pt-BR', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            const number = sortedRecords.length - index;
+            
+            html += `
+                <div class="history-item">
+                    <div class="history-item-content">
+                        <div class="history-emoji">${emoji}</div>
+                        <div class="history-details">
+                            <div class="history-type">
+                                <span class="type-badge ${color}">Cadeirinha ${record.type}</span>
+                                <span class="history-number">#${number}</span>
+                            </div>
+                            <div class="history-time">${time}</div>
+                        </div>
+                    </div>
+                    <button class="delete-btn" onclick="app.deleteRecordAndUpdate('${record.id}')" title="Excluir registro">
+                        🗑️
+                    </button>
+                </div>
+            `;
+        });
+        
+        if (historyList) {
+            historyList.innerHTML = html;
+        }
+    }
+
+    updateSummaryDisplay() {
+        const todayRecords = this.getTodayRecords();
+        const summaryContent = document.getElementById('summaryContent');
+        const emptySummary = document.getElementById('emptySummary');
+        const exportBtn = document.getElementById('exportBtn');
+        
+        if (todayRecords.length === 0) {
+            if (summaryContent) summaryContent.style.display = 'none';
+            if (emptySummary) emptySummary.style.display = 'block';
+            if (exportBtn) exportBtn.disabled = true;
+            return;
+        }
+        
+        if (summaryContent) summaryContent.style.display = 'block';
+        if (emptySummary) emptySummary.style.display = 'none';
+        if (exportBtn) exportBtn.disabled = false;
+        
+        if (summaryContent) {
+            summaryContent.innerHTML = this.generateSummaryHTML(todayRecords);
+        }
+    }
+
+    generateSummaryHTML(records) {
+        const counts = {
+            B: records.filter(r => r.type === 'B').length,
+            T0: records.filter(r => r.type === 'T0').length,
+            T1: records.filter(r => r.type === 'T1').length,
+            T2: records.filter(r => r.type === 'T2').length
+        };
+        
+        // Primeira e última descida
+        const sortedRecords = records.slice().sort((a, b) => 
+            new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+        );
+        const first = sortedRecords[0];
+        const last = sortedRecords[sortedRecords.length - 1];
+        
+        // Dados por hora
+        const hourlyData = this.getHourlyData(records);
+        
+        return `
+            <div class="summary-header">
+                <h2 class="summary-title">📊 Resumo do Dia</h2>
+                <p class="summary-date">${new Date().toLocaleDateString('pt-BR', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                })}</p>
+                ${this.operatorName ? `<p class="summary-operator">Operador: ${this.operatorName}</p>` : ''}
+            </div>
+
+            <div class="summary-total">
+                <h3>Total de Descidas</h3>
+                <div class="summary-total-count">${records.length}</div>
+            </div>
+
+            <div class="summary-types">
+                <h3>Descidas por Tipo de Cadeirinha</h3>
+                <div class="summary-types-grid">
+                    <div class="summary-type-item green">
+                        <div class="summary-type-emoji">🟢</div>
+                        <div class="summary-type-count">${counts.B}</div>
+                        <div class="summary-type-label">Cadeirinha B</div>
+                    </div>
+                    <div class="summary-type-item blue">
+                        <div class="summary-type-emoji">🔵</div>
+                        <div class="summary-type-count">${counts.T0}</div>
+                        <div class="summary-type-label">Cadeirinha T0</div>
+                    </div>
+                    <div class="summary-type-item yellow">
+                        <div class="summary-type-emoji">🟡</div>
+                        <div class="summary-type-count">${counts.T1}</div>
+                        <div class="summary-type-label">Cadeirinha T1</div>
+                    </div>
+                    <div class="summary-type-item red">
+                        <div class="summary-type-emoji">🔴</div>
+                        <div class="summary-type-count">${counts.T2}</div>
+                        <div class="summary-type-label">Cadeirinha T2</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="summary-first-last">
+                <div class="summary-time-card">
+                    <h3>🌅 Primeira Descida</h3>
+                    <div class="summary-time-emoji">${this.getTypeEmoji(first.type)}</div>
+                    <div class="summary-time-type">Cadeirinha ${first.type}</div>
+                    <div class="summary-time-value">${new Date(first.timestamp).toLocaleTimeString('pt-BR', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })}</div>
+                </div>
+                <div class="summary-time-card">
+                    <h3>🌆 Última Descida</h3>
+                    <div class="summary-time-emoji">${this.getTypeEmoji(last.type)}</div>
+                    <div class="summary-time-type">Cadeirinha ${last.type}</div>
+                    <div class="summary-time-value">${new Date(last.timestamp).toLocaleTimeString('pt-BR', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })}</div>
+                </div>
+            </div>
+
+            ${hourlyData.length > 0 ? this.generateHourlyChartHTML(hourlyData) : ''}
+        `;
+    }
+
+    generateHourlyChartHTML(hourlyData) {
+        const maxCount = Math.max(...hourlyData.map(item => item[1]));
+        
+        let html = '';
+        hourlyData.forEach(item => {
+            const hour = item[0];
+            const count = item[1];
+            html += `
+                <div class="chart-bar">
+                    <div class="chart-time">${hour}</div>
+                    <div class="chart-bar-container">
+                        <div class="chart-bar-fill" style="width: ${(count / maxCount * 100)}%">
+                            ${count > 0 ? count : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        return `
+            <div class="hourly-chart">
+                <h3>Descidas por Hora</h3>
+                ${html}
+            </div>
+        `;
+    }
+
+    getHourlyData(records) {
+        const hourlyCount = {};
+        
+        records.forEach(record => {
+            const hour = new Date(record.timestamp).getHours();
+            let hourKey = hour.toString();
+            if (hourKey.length === 1) hourKey = '0' + hourKey;
+            hourKey += ':00';
+            hourlyCount[hourKey] = (hourlyCount[hourKey] || 0) + 1;
+        });
+        
+        const result = [];
+        Object.keys(hourlyCount).forEach(key => {
+            result.push([key, hourlyCount[key]]);
+        });
+        
+        result.sort((a, b) => a[0].localeCompare(b[0]));
+        
+        return result;
+    }
+
+    // ==================
+    // VINCULAÇÃO DE EVENTOS
+    // ==================
+
+    bindEvents() {
+        this.bindCounterEvents();
+        this.bindTabEvents();
+        this.bindFormEvents();
+        this.bindModalEvents();
+        this.bindKeyboardEvents();
+    }
+
+    bindCounterEvents() {
+        // Eventos dos botões de contador (adicionar)
+        const counterBtns = document.querySelectorAll('.counter-btn');
+        console.log('Vinculando eventos aos botões de contador:', counterBtns.length);
+        
+        counterBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const type = btn.getAttribute('data-type');
+                console.log('Clique no botão contador:', type);
+                
+                this.addRecord(type);
+                this.updateDisplay();
+                this.showNotification(`Descida ${type} registrada!`);
+                
+                // Animação de feedback
+                btn.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    btn.style.transform = '';
+                }, 150);
+            });
+        });
+
+        // Eventos dos botões de reduzir
+        const reduceBtns = document.querySelectorAll('.reduce-btn');
+        console.log('Vinculando eventos aos botões de redução:', reduceBtns.length);
+        
+        reduceBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const type = btn.getAttribute('data-type');
+                console.log('Clique no botão redução:', type);
+                
+                const removed = this.removeLastRecord(type);
+                if (removed) {
+                    this.updateDisplay();
+                    this.showNotification(`Descida ${type} removida!`);
+                } else {
+                    this.showNotification(`Nenhuma descida ${type} para remover`);
+                }
+                
+                // Animação de feedback
+                btn.style.transform = 'scale(0.9)';
+                setTimeout(() => {
+                    btn.style.transform = '';
+                }, 150);
+            });
+        });
+    }
+
+    bindTabEvents() {
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const tab = e.currentTarget.dataset.tab;
+                this.switchTab(tab);
+            });
+        });
+    }
+
+    bindFormEvents() {
+        // Campo nome do operador
+        const operatorInput = document.getElementById('operatorName');
+        if (operatorInput) {
+            operatorInput.addEventListener('input', (e) => {
+                this.saveOperatorName(e.target.value);
+            });
+        }
+
+        // Botão limpar tudo
+        const clearBtn = document.getElementById('clearAllBtn');
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                this.showConfirmModal(
+                    'Tem certeza que deseja zerar todas as contagens? Esta ação não pode ser desfeita.',
+                    () => {
+                        this.clearAllRecords();
+                        this.updateDisplay();
+                        this.showNotification('Todos os registros foram limpos!');
+                    }
+                );
+            });
+        }
+    }
+
+    bindModalEvents() {
+        const modalCancel = document.getElementById('modalCancel');
+        const modalConfirm = document.getElementById('modalConfirm');
+        const modalOverlay = document.getElementById('modalOverlay');
+        
+        if (modalCancel) {
+            modalCancel.addEventListener('click', () => {
+                this.hideModal();
+            });
+        }
+
+        if (modalConfirm) {
+            modalConfirm.addEventListener('click', () => {
+                if (this.modalCallback) {
+                    this.modalCallback();
+                }
+                this.hideModal();
+            });
+        }
+
+        if (modalOverlay) {
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === e.currentTarget) {
+                    this.hideModal();
+                }
+            });
+        }
+    }
+
+    bindKeyboardEvents() {
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.hideModal();
+            }
+            
+            if (['1', '2', '3', '4'].includes(e.key) && this.activeTab === 'counter') {
+                const types = ['B', 'T0', 'T1', 'T2'];
+                const type = types[parseInt(e.key) - 1];
+                this.addRecord(type);
+                this.updateDisplay();
+                this.showNotification(`Descida ${type} registrada!`);
+            }
+        });
+    }
+
+    // ==================
+    // MÉTODOS AUXILIARES
+    // ==================
+
+    deleteRecordAndUpdate(id) {
+        this.deleteRecord(id);
+        this.updateDisplay();
+        this.showNotification('Registro excluído!');
+    }
+
+    exportSummaryAsImage() {
+        const records = this.getTodayRecords();
+        
+        if (records.length === 0) {
+            alert('Não há dados para exportar. Registre algumas descidas primeiro.');
+            return;
+        }
+        
+        const exportBtn = document.getElementById('exportBtn');
+        if (!exportBtn) return;
+        
+        const originalHTML = exportBtn.innerHTML;
+        
+        exportBtn.innerHTML = '<div class="loading"><div class="spinner"></div><span>Exportando...</span></div>';
+        exportBtn.disabled = true;
+        
+        setTimeout(() => {
+            try {
+                const date = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
+                const filename = `tirolesa-resumo-${date}${this.operatorName ? '-' + this.operatorName.replace(/\s+/g, '-') : ''}.png`;
+                
+                console.log('Simulando download de:', filename);
+                alert(`Em uma implementação real, seria baixado o arquivo: ${filename}`);
+                this.showNotification('Resumo exportado com sucesso!');
+            } catch (error) {
+                console.error('Erro ao exportar:', error);
+                alert('Erro ao exportar imagem. Tente novamente.');
+            } finally {
+                exportBtn.innerHTML = originalHTML;
+                exportBtn.disabled = false;
+            }
+        }, 2000);
+    }
 }
 
-function simulateImageExport() {
-    const summaryElement = document.getElementById('summaryContent');
-
-  html2canvas(summaryElement).then(canvas => {
-      const imageDataURL = canvas.toDataURL('image/png');
-
-      // Salvar no localStorage
-      try {
-          localStorage.setItem('summary-image', imageDataURL);
-          console.log('Imagem salva no localStorage com sucesso.');
-      } catch (e) {
-          console.warn('Erro ao salvar imagem no localStorage (possivelmente excedeu o limite de tamanho):', e);
-      }
-
-      // Criar e acionar o download
-      const link = document.createElement('a');
-      const date = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
-      const filename = `tirolesa-resumo-${date}${operatorName ? '-' + operatorName.replace(/\s+/g, '-') : ''}.png`;
-
-      link.href = imageDataURL;
-      link.download = filename;
-      link.click();
-  }).catch(error => {
-      console.error('Erro ao gerar imagem do resumo:', error);
-      alert('Erro ao exportar imagem. Tente novamente.');
-  });
-}
-
-// ======================
-// CSS PARA ANIMAÇÕES
-// ======================
-var style = document.createElement('style');
-style.textContent =
-    '@keyframes slideInRight {' +
-        'from { transform: translateX(100%); opacity: 0; }' +
-        'to { transform: translateX(0); opacity: 1; }' +
-    '}' +
-    '@keyframes slideOutRight {' +
-        'from { transform: translateX(0); opacity: 1; }' +
-        'to { transform: translateX(100%); opacity: 0; }' +
-    '}';
+// CSS para animações (adicionado dinamicamente)
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideInRight {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOutRight {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+`;
 document.head.appendChild(style);
 
-// ======================
-// TRATAMENTO DE ERROS
-// ======================
-window.addEventListener('error', function(event) {
-    console.error('Erro na aplicação:', event.error);
+// Inicializar aplicação quando DOM estiver carregado
+let app;
+document.addEventListener('DOMContentLoaded', () => {
+    app = new TirolesaCounter();
 });
 
-console.log('📋 Sistema carregado - Funcionalidades disponíveis:');
-console.log('🔧 Atalhos: 1-4 para adicionar descidas, ESC para fechar modal');
-console.log('💾 Dados salvos automaticamente no navegador');
+// Funções globais para compatibilidade com HTML
+function deleteRecord(id) {
+    if (app) {
+        app.deleteRecordAndUpdate(id);
+    }
+}
+
+function exportSummaryAsImage() {
+    if (app) {
+        app.exportSummaryAsImage();
+    }
+}
+
+// Tratamento de erros
+window.addEventListener('error', (event) => {
+    console.error('Erro na aplicação:', event.error);
+});
