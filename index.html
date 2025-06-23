@@ -4,12 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Contador de Descidas teste V1 </title>
+    <title>🏔️ Contador de Descidas</title>
     <meta name="description" content="Sistema para contagem de descidas de tirolesa">
-
+    
     <!-- CSS Styles -->
     <link rel="stylesheet" href="styles.css">
-
+    
     <!-- Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏔️</text></svg>">
 </head>
@@ -20,19 +20,19 @@
             <div class="container">
                 <div class="header-content">
                     <div class="header-info">
-                        <h1 class="app-title"> Contador de Descidas versão de teste v1 </h1>
+                        <h1 class="app-title">🏔️ Contador de Descidas</h1>
                         <p class="current-date" id="currentDate"></p>
                     </div>
-
+                    
                     <div class="header-controls">
-                        <input
-                            type="text"
-                            id="operatorName"
+                        <input 
+                            type="text" 
+                            id="operatorName" 
                             placeholder="Nome do operador"
                             class="operator-input"
                         >
-                        <button
-                            id="clearAllBtn"
+                        <button 
+                            id="clearAllBtn" 
                             class="clear-all-btn"
                         >
                             Zerar Tudo
@@ -59,39 +59,60 @@
             </div>
 
             <!-- TAB CONTENT CONTAINERS -->
-
+            
             <!-- COUNTER TAB -->
             <div class="tab-content active" id="counterTab">
                 <div class="counter-section">
                     <div class="section-header">
                         <h2>Registrar Nova Descida</h2>
-                        <p>Clique no tipo de cadeirinha utilizada cliente </p>
+                        <p>Clique no tipo de cadeirinha utilizada ou use as teclas 1-4</p>
                     </div>
 
+                    <!-- COUNTER BUTTONS GRID 2x2 -->
                     <div class="counter-buttons">
-                        <button class="counter-btn green" data-type="B">
-                            <div class="counter-emoji">🟢</div>
-                            <div class="counter-label">Cadeirinha B</div>
-                            <div class="counter-count" id="countB">0</div>
-                        </button>
+                        <div class="counter-btn-container">
+                            <button class="counter-btn green" data-type="B">
+                                <div class="counter-emoji">🟢</div>
+                                <div class="counter-label">Cadeirinha B</div>
+                                <div class="counter-count" id="countB">0</div>
+                            </button>
+                            <button class="reduce-btn" data-type="B" title="Remover última descida B">
+                                ➖
+                            </button>
+                        </div>
 
-                        <button class="counter-btn blue" data-type="T0">
-                            <div class="counter-emoji">🔵</div>
-                            <div class="counter-label">Cadeirinha T0</div>
-                            <div class="counter-count" id="countT0">0</div>
-                        </button>
+                        <div class="counter-btn-container">
+                            <button class="counter-btn blue" data-type="T0">
+                                <div class="counter-emoji">🔵</div>
+                                <div class="counter-label">Cadeirinha T0</div>
+                                <div class="counter-count" id="countT0">0</div>
+                            </button>
+                            <button class="reduce-btn" data-type="T0" title="Remover última descida T0">
+                                ➖
+                            </button>
+                        </div>
 
-                        <button class="counter-btn yellow" data-type="T1">
-                            <div class="counter-emoji">🟡</div>
-                            <div class="counter-label">Cadeirinha T1</div>
-                            <div class="counter-count" id="countT1">0</div>
-                        </button>
+                        <div class="counter-btn-container">
+                            <button class="counter-btn yellow" data-type="T1">
+                                <div class="counter-emoji">🟡</div>
+                                <div class="counter-label">Cadeirinha T1</div>
+                                <div class="counter-count" id="countT1">0</div>
+                            </button>
+                            <button class="reduce-btn" data-type="T1" title="Remover última descida T1">
+                                ➖
+                            </button>
+                        </div>
 
-                        <button class="counter-btn red" data-type="T2">
-                            <div class="counter-emoji">🔴</div>
-                            <div class="counter-label">Cadeirinha T2</div>
-                            <div class="counter-count" id="countT2">0</div>
-                        </button>
+                        <div class="counter-btn-container">
+                            <button class="counter-btn red" data-type="T2">
+                                <div class="counter-emoji">🔴</div>
+                                <div class="counter-label">Cadeirinha T2</div>
+                                <div class="counter-count" id="countT2">0</div>
+                            </button>
+                            <button class="reduce-btn" data-type="T2" title="Remover última descida T2">
+                                ➖
+                            </button>
+                        </div>
                     </div>
 
                     <!-- DAILY TOTALS SUMMARY -->
@@ -134,11 +155,11 @@
                         <h2>Histórico do Dia</h2>
                         <p id="historyDescription">0 descidas registradas</p>
                     </div>
-
+                    
                     <div class="history-list" id="historyList">
                         <!-- Histórico será gerado dinamicamente pelo JavaScript -->
                     </div>
-
+                    
                     <div class="empty-history" id="emptyHistory">
                         <div class="empty-icon">📝</div>
                         <h3>Nenhuma descida registrada hoje</h3>
@@ -152,9 +173,9 @@
                 <div class="summary-section" id="summaryContent">
                     <!-- Resumo será gerado dinamicamente pelo JavaScript -->
                 </div>
-
+                
                 <div class="export-section">
-                    <button class="export-btn" id="exportBtn">
+                    <button class="export-btn" id="exportBtn" onclick="exportSummaryAsImage()">
                         <span>📸</span>
                         <span>Exportar como PNG</span>
                     </button>
@@ -182,7 +203,6 @@
     </div>
 
     <!-- JavaScript -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="script.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
