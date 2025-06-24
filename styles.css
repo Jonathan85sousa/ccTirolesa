@@ -866,7 +866,7 @@ body {
 /* =================
    RESPONSIVE DESIGN
    ================= */
-@media (max-width: 768px) {
+@media (max-width: 480px) {
     .app-title {
         font-size: 1.25rem;
     }
