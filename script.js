@@ -1,5 +1,4 @@
-// Sistema de Contagem de Descidas de Tirolesa
-// JavaScript Puro - Versão Completa
+// JavaScript Puro - Versão Limpa e Otimizada
 
 class TirolesaCounter {
     constructor() {
@@ -14,17 +13,12 @@ class TirolesaCounter {
     init() {
         console.log('🏔️ Inicializando Contador de Descidas');
         
-        // Carregar dados salvos
         this.loadData();
-        
-        // Configurar interface
         this.updateCurrentDate();
         this.bindEvents();
         this.updateDisplay();
         
         console.log('✅ Sistema inicializado com sucesso!');
-        console.log('🔧 Atalhos: 1-4 para adicionar descidas, ESC para fechar modal');
-        console.log('💾 Dados salvos automaticamente no navegador');
     }
 
     // ==================
@@ -100,12 +94,10 @@ class TirolesaCounter {
             return false;
         }
         
-        // Pegar o último registro deste tipo (mais recente)
         const lastRecord = typeRecords.sort((a, b) => 
             new Date(b.timestamp) - new Date(a.timestamp)
         )[0];
         
-        // Remover o registro
         this.records = this.records.filter(record => record.id !== lastRecord.id);
         
         this.saveRecords();
@@ -144,7 +136,6 @@ class TirolesaCounter {
     switchTab(tab) {
         this.activeTab = tab;
         
-        // Atualizar botões
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.classList.remove('active');
         });
@@ -153,7 +144,6 @@ class TirolesaCounter {
             activeBtn.classList.add('active');
         }
         
-        // Atualizar conteúdo
         document.querySelectorAll('.tab-content').forEach(content => {
             content.classList.remove('active');
         });
@@ -162,7 +152,6 @@ class TirolesaCounter {
             activeContent.classList.add('active');
         }
 
-        // Atualizar dados específicos
         if (tab === 'history') {
             this.updateHistoryDisplay();
         } else if (tab === 'summary') {
@@ -252,7 +241,6 @@ class TirolesaCounter {
     updateCounterDisplay() {
         const todayRecords = this.getTodayRecords();
         
-        // Contar por tipo
         const counts = {
             B: todayRecords.filter(r => r.type === 'B').length,
             T0: todayRecords.filter(r => r.type === 'T0').length,
@@ -260,7 +248,6 @@ class TirolesaCounter {
             T2: todayRecords.filter(r => r.type === 'T2').length
         };
         
-        // Atualizar contadores
         Object.keys(counts).forEach(type => {
             const countElement = document.getElementById('count' + type);
             const totalElement = document.getElementById('total' + type);
@@ -269,7 +256,6 @@ class TirolesaCounter {
             if (totalElement) totalElement.textContent = counts[type];
         });
         
-        // Total geral
         const grandTotal = todayRecords.length;
         const grandTotalElement = document.getElementById('grandTotal');
         if (grandTotalElement) {
@@ -291,7 +277,6 @@ class TirolesaCounter {
         const emptyHistory = document.getElementById('emptyHistory');
         const historyDescription = document.getElementById('historyDescription');
         
-        // Atualizar descrição
         const count = todayRecords.length;
         if (historyDescription) {
             historyDescription.textContent = `${count} descida${count !== 1 ? 's' : ''} registrada${count !== 1 ? 's' : ''}`;
@@ -306,12 +291,10 @@ class TirolesaCounter {
         if (historyList) historyList.style.display = 'block';
         if (emptyHistory) emptyHistory.style.display = 'none';
         
-        // Ordenar por data (mais recente primeiro)
         const sortedRecords = todayRecords.slice().sort((a, b) => 
             new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
         );
         
-        // Gerar HTML
         let html = '';
         sortedRecords.forEach((record, index) => {
             const emoji = this.getTypeEmoji(record.type);
@@ -335,7 +318,7 @@ class TirolesaCounter {
                             <div class="history-time">${time}</div>
                         </div>
                     </div>
-                    <button class="delete-btn" onclick="deleteRecord('${record.id}')" title="Excluir registro">
+                    <button class="delete-btn" onclick="app.deleteRecordAndUpdate('${record.id}')" title="Excluir registro">
                         🗑️
                     </button>
                 </div>
@@ -377,81 +360,81 @@ class TirolesaCounter {
             T2: records.filter(r => r.type === 'T2').length
         };
         
-        // Primeira e última descida
         const sortedRecords = records.slice().sort((a, b) => 
             new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
         );
         const first = sortedRecords[0];
         const last = sortedRecords[sortedRecords.length - 1];
         
-        // Dados por hora
         const hourlyData = this.getHourlyData(records);
         
         return `
-            <div class="summary-header">
-                <h2 class="summary-title">📊 Resumo do Dia</h2>
-                <p class="summary-date">${new Date().toLocaleDateString('pt-BR', { 
-                    weekday: 'long', 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                })}</p>
-                ${this.operatorName ? `<p class="summary-operator">Operador: ${this.operatorName}</p>` : ''}
-            </div>
+            <div id="summary-export" class="summary-section">
+                <div class="summary-header">
+                    <h2 class="summary-title">📊 Resumo do Dia</h2>
+                    <p class="summary-date">${new Date().toLocaleDateString('pt-BR', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                    })}</p>
+                    ${this.operatorName ? `<p class="summary-operator">Operador: ${this.operatorName}</p>` : ''}
+                </div>
 
-            <div class="summary-total">
-                <h3>Total de Descidas</h3>
-                <div class="summary-total-count">${records.length}</div>
-            </div>
+                <div class="summary-total">
+                    <h3>Total de Descidas</h3>
+                    <div class="summary-total-count">${records.length}</div>
+                </div>
 
-            <div class="summary-types">
-                <h3>Descidas por Tipo de Cadeirinha</h3>
-                <div class="summary-types-grid">
-                    <div class="summary-type-item green">
-                        <div class="summary-type-emoji">🟢</div>
-                        <div class="summary-type-count">${counts.B}</div>
-                        <div class="summary-type-label">Cadeirinha B</div>
-                    </div>
-                    <div class="summary-type-item blue">
-                        <div class="summary-type-emoji">🔵</div>
-                        <div class="summary-type-count">${counts.T0}</div>
-                        <div class="summary-type-label">Cadeirinha T0</div>
-                    </div>
-                    <div class="summary-type-item yellow">
-                        <div class="summary-type-emoji">🟡</div>
-                        <div class="summary-type-count">${counts.T1}</div>
-                        <div class="summary-type-label">Cadeirinha T1</div>
-                    </div>
-                    <div class="summary-type-item red">
-                        <div class="summary-type-emoji">🔴</div>
-                        <div class="summary-type-count">${counts.T2}</div>
-                        <div class="summary-type-label">Cadeirinha T2</div>
+                <div class="summary-types">
+                    <h3>Descidas por Tipo de Cadeirinha</h3>
+                    <div class="summary-types-grid">
+                        <div class="summary-type-item green">
+                            <div class="summary-type-emoji">🟢</div>
+                            <div class="summary-type-count">${counts.B}</div>
+                            <div class="summary-type-label">Cadeirinha B</div>
+                        </div>
+                        <div class="summary-type-item blue">
+                            <div class="summary-type-emoji">🔵</div>
+                            <div class="summary-type-count">${counts.T0}</div>
+                            <div class="summary-type-label">Cadeirinha T0</div>
+                        </div>
+                        <div class="summary-type-item yellow">
+                            <div class="summary-type-emoji">🟡</div>
+                            <div class="summary-type-count">${counts.T1}</div>
+                            <div class="summary-type-label">Cadeirinha T1</div>
+                        </div>
+                        <div class="summary-type-item red">
+                            <div class="summary-type-emoji">🔴</div>
+                            <div class="summary-type-count">${counts.T2}</div>
+                            <div class="summary-type-label">Cadeirinha T2</div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="summary-first-last">
-                <div class="summary-time-card">
-                    <h3>🌅 Primeira Descida</h3>
-                    <div class="summary-time-emoji">${this.getTypeEmoji(first.type)}</div>
-                    <div class="summary-time-type">Cadeirinha ${first.type}</div>
-                    <div class="summary-time-value">${new Date(first.timestamp).toLocaleTimeString('pt-BR', {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    })}</div>
+                <div class="summary-first-last">
+                    <div class="summary-time-card">
+                        <h3>🌅 Primeira Descida</h3>
+                        <div class="summary-time-emoji">${this.getTypeEmoji(first.type)}</div>
+                        <div class="summary-time-type">Cadeirinha ${first.type}</div>
+                        <div class="summary-time-value">${new Date(first.timestamp).toLocaleTimeString('pt-BR', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        })}</div>
+                    </div>
+                    <div class="summary-time-card">
+                        <h3>🌆 Última Descida</h3>
+                        <div class="summary-time-emoji">${this.getTypeEmoji(last.type)}</div>
+                        <div class="summary-time-type">Cadeirinha ${last.type}</div>
+                        <div class="summary-time-value">${new Date(last.timestamp).toLocaleTimeString('pt-BR', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        })}</div>
+                    </div>
                 </div>
-                <div class="summary-time-card">
-                    <h3>🌆 Última Descida</h3>
-                    <div class="summary-time-emoji">${this.getTypeEmoji(last.type)}</div>
-                    <div class="summary-time-type">Cadeirinha ${last.type}</div>
-                    <div class="summary-time-value">${new Date(last.timestamp).toLocaleTimeString('pt-BR', {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    })}</div>
-                </div>
-            </div>
 
-            ${hourlyData.length > 0 ? this.generateHourlyChartHTML(hourlyData) : ''}
+                ${hourlyData.length > 0 ? this.generateHourlyChartHTML(hourlyData) : ''}
+            </div>
         `;
     }
 
@@ -516,7 +499,6 @@ class TirolesaCounter {
     }
 
     bindCounterEvents() {
-        // Eventos dos botões de contador (adicionar)
         const counterBtns = document.querySelectorAll('.counter-btn');
         console.log('Vinculando eventos aos botões de contador:', counterBtns.length);
         
@@ -532,7 +514,6 @@ class TirolesaCounter {
                 this.updateDisplay();
                 this.showNotification(`Descida ${type} registrada!`);
                 
-                // Animação de feedback
                 btn.style.transform = 'scale(0.95)';
                 setTimeout(() => {
                     btn.style.transform = '';
@@ -540,7 +521,6 @@ class TirolesaCounter {
             });
         });
 
-        // Eventos dos botões de reduzir
         const reduceBtns = document.querySelectorAll('.reduce-btn');
         console.log('Vinculando eventos aos botões de redução:', reduceBtns.length);
         
@@ -560,7 +540,6 @@ class TirolesaCounter {
                     this.showNotification(`Nenhuma descida ${type} para remover`);
                 }
                 
-                // Animação de feedback
                 btn.style.transform = 'scale(0.9)';
                 setTimeout(() => {
                     btn.style.transform = '';
@@ -580,7 +559,6 @@ class TirolesaCounter {
     }
 
     bindFormEvents() {
-        // Campo nome do operador
         const operatorInput = document.getElementById('operatorName');
         if (operatorInput) {
             operatorInput.addEventListener('input', (e) => {
@@ -588,7 +566,6 @@ class TirolesaCounter {
             });
         }
 
-        // Botão limpar tudo
         const clearBtn = document.getElementById('clearAllBtn');
         if (clearBtn) {
             clearBtn.addEventListener('click', () => {
@@ -603,7 +580,6 @@ class TirolesaCounter {
             });
         }
 
-        // Botão de exportar
         const exportBtn = document.getElementById('exportBtn');
         if (exportBtn) {
             exportBtn.addEventListener('click', () => {
@@ -667,7 +643,7 @@ class TirolesaCounter {
         this.showNotification('Registro excluído!');
     }
 
-    exportSummaryAsImage() {
+    async exportSummaryAsImage() {
         const records = this.getTodayRecords();
         
         if (records.length === 0) {
@@ -683,37 +659,101 @@ class TirolesaCounter {
         exportBtn.innerHTML = '<div class="loading"><div class="spinner"></div><span>Exportando...</span></div>';
         exportBtn.disabled = true;
         
-        setTimeout(() => {
-            try {
+        try {
+            if (typeof html2canvas === 'undefined') {
+                await this.loadHtml2Canvas();
+            }
+            
+            const element = document.getElementById('summary-export');
+            if (!element) {
+                throw new Error('Elemento de resumo não encontrado');
+            }
+
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            const canvas = await html2canvas(element, {
+                backgroundColor: '#ffffff',
+                scale: 2,
+                logging: false,
+                useCORS: true,
+                allowTaint: true,
+                scrollX: 0,
+                scrollY: 0,
+                width: element.scrollWidth,
+                height: element.scrollHeight
+            });
+
+            canvas.toBlob((blob) => {
+                if (!blob) {
+                    throw new Error('Erro ao gerar imagem');
+                }
+
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                
                 const date = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
                 const filename = `tirolesa-resumo-${date}${this.operatorName ? '-' + this.operatorName.replace(/\s+/g, '-') : ''}.png`;
+                link.download = filename;
                 
-                console.log('Simulando download de:', filename);
-                alert(`Em uma implementação real, seria baixado o arquivo: ${filename}`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                
                 this.showNotification('Resumo exportado com sucesso!');
-            } catch (error) {
-                console.error('Erro ao exportar:', error);
-                alert('Erro ao exportar imagem. Tente novamente.');
-            } finally {
-                exportBtn.innerHTML = originalHTML;
-                exportBtn.disabled = false;
+            }, 'image/png', 1.0);
+
+        } catch (error) {
+            console.error('Erro ao exportar:', error);
+            alert('Erro ao exportar imagem. Verifique se tem dados para exportar e tente novamente.');
+        } finally {
+            exportBtn.innerHTML = originalHTML;
+            exportBtn.disabled = false;
+        }
+    }
+
+    loadHtml2Canvas() {
+        return new Promise((resolve, reject) => {
+            if (typeof html2canvas !== 'undefined') {
+                resolve();
+                return;
             }
-        }, 2000);
+
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+            script.onload = () => {
+                console.log('html2canvas carregado com sucesso');
+                resolve();
+            };
+            script.onerror = () => {
+                console.error('Erro ao carregar html2canvas');
+                reject(new Error('Falha ao carregar biblioteca de exportação'));
+            };
+            document.head.appendChild(script);
+        });
     }
 }
+
+// CSS para animações
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideInRight {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOutRight {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+`;
+document.head.appendChild(style);
 
 // Inicializar aplicação quando DOM estiver carregado
 let app;
 document.addEventListener('DOMContentLoaded', () => {
     app = new TirolesaCounter();
 });
-
-// Funções globais para compatibilidade com HTML
-function deleteRecord(id) {
-    if (app) {
-        app.deleteRecordAndUpdate(id);
-    }
-}
 
 // Tratamento de erros
 window.addEventListener('error', (event) => {
